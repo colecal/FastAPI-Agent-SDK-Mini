@@ -23,6 +23,8 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       # For now, publish the static UI demo from /docs (prebuilt HTML).
       - name: Upload artifact
