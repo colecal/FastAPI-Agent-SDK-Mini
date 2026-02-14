@@ -140,36 +140,52 @@ function saveApiKey(v){
   } catch(e){}
 }
 
+function renderMockTools(el){
+  el.innerHTML = `
+    <div class="toolCard">
+      <div class="name">calculator</div>
+      <div class="desc">Evaluate a math expression (demo-safe).</div>
+      <div class="toolMeta">
+        <span class="toolPill">mock</span>
+        <span class="toolPill">allowed</span>
+      </div>
+    </div>
+    <div class="toolCard">
+      <div class="name">summarize_text</div>
+      <div class="desc">Summarize text into a few sentences.</div>
+      <div class="toolMeta">
+        <span class="toolPill">mock</span>
+        <span class="toolPill">allowed</span>
+      </div>
+    </div>
+    <div class="toolCard">
+      <div class="name">retrieve_corpus</div>
+      <div class="desc">Retrieve relevant snippets from a tiny local corpus.</div>
+      <div class="toolMeta">
+        <span class="toolPill">mock</span>
+        <span class="toolPill">allowed</span>
+      </div>
+    </div>
+  `;
+}
+
 async function fetchTools(){
   const el = $('#tools');
   if(!el) return;
 
   // Pages demo: no backend
   if(shouldForceMock()){
-    el.innerHTML = `
-      <div class="toolCard">
-        <div class="name">calculator</div>
-        <div class="desc">Evaluate a math expression (demo-safe).</div>
-        <div class="toolMeta">
-          <span class="toolPill">mock</span>
-          <span class="toolPill">allowed</span>
-        </div>
-      </div>
-      <div class="toolCard">
-        <div class="name">summarize_text</div>
-        <div class="desc">Summarize text into a few sentences.</div>
-        <div class="toolMeta">
-          <span class="toolPill">mock</span>
-          <span class="toolPill">allowed</span>
-        </div>
-      </div>
-    `;
+    renderMockTools(el);
     return;
   }
 
   el.innerHTML = '<div class="empty">Loading tools…</div>';
   try{
-    const r = await fetch('./api/tools');
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 1800);
+    const r = await fetch('./api/tools', { signal: ctrl.signal });
+    clearTimeout(t);
+
     if(!r.ok) throw new Error(await r.text());
     const data = await r.json();
     const tools = data.tools || [];
@@ -184,18 +200,20 @@ async function fetchTools(){
       const card = document.createElement('div');
       card.className = 'toolCard';
       const allowed = t.permission?.allow !== false;
+      const inputs = Object.keys(t.input_schema||{});
       card.innerHTML = `
         <div class="name">${escapeHtml(t.name)}</div>
         <div class="desc">${escapeHtml(t.description || '')}</div>
         <div class="toolMeta">
           <span class="toolPill">${allowed ? 'allowed' : 'denied'}</span>
-          <span class="toolPill">${escapeHtml(JSON.stringify(Object.keys(t.input_schema||{})).slice(0,60))}</span>
+          <span class="toolPill">inputs: ${escapeHtml(inputs.join(', ') || '(none)')}</span>
         </div>
       `;
       el.appendChild(card);
     });
   }catch(e){
-    el.innerHTML = `<div class="empty">Couldn’t load tools from backend. (${escapeHtml(String(e))})</div>`;
+    // If backend isn't running, fall back to showing mock tool cards instead of hanging.
+    renderMockTools(el);
   }
 }
 
