@@ -30,6 +30,10 @@
       <div class="composer">
         <textarea id="input" rows="2" placeholder="Try: calculate 2*(3+4)  |  summarize: ...  |  explain agent sdk"></textarea>
         <div class="composer-right">
+          <label class="toggleRow" title="When ON, runs fully offline using deterministic mock logic.">
+            <input id="mockToggle" type="checkbox" />
+            <span class="toggleText">Mock mode</span>
+          </label>
           <input id="apiKey" class="apiKey" type="password" placeholder="API key (optional)" autocomplete="off" />
           <button id="send" class="btn primary">Run</button>
         </div>

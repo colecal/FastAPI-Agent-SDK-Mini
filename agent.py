@@ -47,7 +47,13 @@ class Agent:
 
                 plan = self._plan(req.message, observation)
 
-                choice = await self._choose_tool(req.message, plan, observation, api_key_override=req.api_key)
+                choice = await self._choose_tool(
+                    req.message,
+                    plan,
+                    observation,
+                    api_key_override=req.api_key,
+                    force_mock=req.force_mock,
+                )
 
                 tool_call: ToolCall | None = None
                 tool_result = None
@@ -119,9 +125,10 @@ class Agent:
         plan: str,
         observation: str,
         api_key_override: str | None = None,
+        force_mock: bool = False,
     ) -> ToolChoice:
         api_key = api_key_override or settings.openai_api_key
-        if settings.mock_mode or not api_key:
+        if force_mock or settings.mock_mode or not api_key:
             return self._mock_choose_tool(user_message, observation)
 
         # Real LLM path: ask for a ToolChoice JSON object.

@@ -121,8 +121,13 @@ function mockRun(text){
 }
 
 function shouldForceMock(){
+  // UI toggle (default ON for safety)
+  const toggle = $('#mockToggle');
+  if(toggle) return !!toggle.checked;
+
   const params = new URLSearchParams(location.search);
   if(params.get('mock') === '1') return true;
+
   // GitHub Pages: no backend, so default to mock.
   if(location.hostname.endsWith('github.io')) return true;
   return false;
@@ -217,6 +222,16 @@ async function fetchTools(){
   }
 }
 
+function loadMockToggle(){
+  try { return (localStorage.getItem('FASTAPI_AGENT_SDK_FORCE_MOCK') || '1') === '1'; }
+  catch(e){ return true; }
+}
+
+function saveMockToggle(on){
+  try { localStorage.setItem('FASTAPI_AGENT_SDK_FORCE_MOCK', on ? '1' : '0'); }
+  catch(e){}
+}
+
 async function runAgent() {
   const text = $('#input').value.trim();
   if (!text) return;
@@ -239,10 +254,12 @@ async function runAgent() {
     const apiKey = ($('#apiKey')?.value || '').trim();
     saveApiKey(apiKey);
 
+    const forceMock = shouldForceMock();
+
     const resp = await fetch('./api/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, history: [], max_steps: 6, api_key: apiKey || null })
+      body: JSON.stringify({ message: text, history: [], max_steps: 6, api_key: apiKey || null, force_mock: forceMock })
     });
     if (!resp.ok) throw new Error(await resp.text());
 
@@ -274,6 +291,12 @@ $('#input').addEventListener('keydown', (e) => {
 if($('#apiKey')){
   $('#apiKey').value = loadApiKey();
   $('#apiKey').addEventListener('change', (e)=> saveApiKey(e.target.value.trim()));
+}
+
+// Mock toggle persistence
+if($('#mockToggle')){
+  $('#mockToggle').checked = loadMockToggle();
+  $('#mockToggle').addEventListener('change', (e)=> saveMockToggle(!!e.target.checked));
 }
 
 if($('#refreshTools')) $('#refreshTools').addEventListener('click', fetchTools);
