@@ -1,0 +1,17 @@
+[
+  {
+    "name": "calculator_simple",
+    "input": "calculate 2*(3+4)",
+    "expect_contains": "Result: 14"
+  },
+  {
+    "name": "summarize_first_sentence",
+    "input": "summarize: FastAPI is great. It is fast. It uses Pydantic.",
+    "expect_contains": "FastAPI is great."
+  },
+  {
+    "name": "retrieval_agent_sdk",
+    "input": "explain agent sdk mini architecture",
+    "expect_contains": "Top local matches"
+  }
+]

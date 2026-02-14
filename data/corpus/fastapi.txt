@@ -1,0 +1,7 @@
+FastAPI basics
+
+FastAPI is a modern, high-performance Python web framework for building APIs.
+Common patterns:
+- Serve static files for a lightweight frontend.
+- Provide JSON endpoints for agent runs and trace inspection.
+- Use Pydantic models for request/response validation.

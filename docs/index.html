@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>FastAPI Agent SDK Mini (Static Demo)</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:#0b1020; color:#e7ecff}
+    header{padding:16px 18px; border-bottom:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.25)}
+    main{max-width:900px;margin:0 auto;padding:16px 18px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    input,button,textarea{font:inherit}
+    textarea{width:100%;min-height:70px;border-radius:12px;border:1px solid rgba(255,255,255,.12);padding:10px;background:rgba(255,255,255,.04);color:#e7ecff}
+    button{border-radius:12px;border:1px solid rgba(255,255,255,.12);padding:10px 12px;background:rgba(124,92,255,.35);color:#e7ecff;cursor:pointer}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.04);padding:12px;margin-top:12px}
+    pre{white-space:pre-wrap}
+    .muted{color:#aab3d6}
+  </style>
+</head>
+<body>
+  <header>
+    <div style="font-weight:700">FastAPI Agent SDK Mini — Static Mock Demo</div>
+    <div class="muted" style="margin-top:4px">Runs fully in-browser (no server). Intended for GitHub Pages / iframes.</div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div class="muted">Input</div>
+      <textarea id="input" placeholder="Try: calculate 2*(3+4) | summarize: ... | explain agent sdk"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button id="run">Run</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="muted">Output</div>
+      <pre id="out"></pre>
+    </div>
+
+    <div class="card">
+      <div class="muted">Trace (mock)</div>
+      <pre id="trace"></pre>
+    </div>
+
+    <div class="muted" style="margin-top:14px">Note: the real FastAPI app adds typed tools, APIs, and persistent traces.</div>
+  </main>
+
+<script>
+function mockChooseTool(msg, observation){
+  const text = msg.toLowerCase().trim();
+  if(observation) return {action:'final', final:observation};
+  if(text.includes('calculate') || /[0-9][\d\s\+\-\*\/\(\)\.]/.test(text)){
+    const expr = text.includes('calculate') ? msg.split(/calculate/i)[1].trim() : msg;
+    return {action:'tool', tool_call:{tool_name:'calculator', arguments:{expression: expr}}};
+  }
+  if(text.startsWith('summarize') || text.includes('summary')){
+    const payload = msg.includes(':') ? msg.split(':',2)[1].trim() : msg;
+    return {action:'tool', tool_call:{tool_name:'summarize_text', arguments:{text: payload, max_sentences: 3}}};
+  }
+  return {action:'final', final:"Mock mode: try 'calculate 2*(3+4)' or 'summarize: ...'"};
+}
+
+function summarizeText(text, n){
+  const parts = text.replace(/\n/g,' ').split('.').map(s=>s.trim()).filter(Boolean);
+  let out = parts.slice(0,n).join('. ');
+  if(out && !out.endsWith('.')) out += '.';
+  return out;
+}
+
+function safeCalc(expr){
+  // extremely small demo: uses Function; ok for static demo only.
+  const cleaned = expr.replace(/[^0-9\+\-\*\/\(\)\.\s%]/g,'');
+  return Function(`"use strict"; return (${cleaned})`)();
+}
+
+function observe(call, result){
+  if(call.tool_name==='calculator') return `Result: ${result}`;
+  if(call.tool_name==='summarize_text') return result;
+  return String(result);
+}
+
+async function run(){
+  const msg = document.querySelector('#input').value.trim();
+  if(!msg) return;
+
+  const trace = [];
+  let observation = '';
+  let final = '';
+
+  for(let step=1; step<=4; step++){
+    const plan = observation ? 'Use tool output to craft final response.' : 'Pick best tool for the request.';
+    const choice = mockChooseTool(msg, observation);
+    trace.push({step, plan, choice});
+
+    if(choice.action==='final') { final = choice.final; break; }
+
+    const call = choice.tool_call;
+    let result;
+    if(call.tool_name==='calculator') result = safeCalc(call.arguments.expression);
+    if(call.tool_name==='summarize_text') result = summarizeText(call.arguments.text, call.arguments.max_sentences);
+
+    observation = observe(call, result);
+    trace[trace.length-1].observation = observation;
+  }
+
+  document.querySelector('#out').textContent = final || observation;
+  document.querySelector('#trace').textContent = JSON.stringify(trace, null, 2);
+}
+
+document.querySelector('#run').addEventListener('click', run);
+</script>
+</body>
+</html>

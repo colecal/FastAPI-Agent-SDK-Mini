@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FastAPI Agent SDK Mini</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">A</div>
+      <div>
+        <div class="title">FastAPI Agent SDK Mini</div>
+        <div class="subtitle">plan → tool → observe → iterate → finalize</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn" href="/api/tools" target="_blank" rel="noreferrer">Tools JSON</a>
+      <a class="btn" href="/docs" target="_blank" rel="noreferrer">GitHub Pages demo</a>
+      <a class="btn primary" href="/api/traces" target="_blank" rel="noreferrer">Traces JSON</a>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card chat">
+      <div class="card-h">Chat</div>
+      <div id="messages" class="messages"></div>
+      <div class="composer">
+        <textarea id="input" rows="2" placeholder="Try: calculate 2*(3+4)  |  summarize: ...  |  explain agent sdk"></textarea>
+        <button id="send" class="btn primary">Run</button>
+      </div>
+      <div class="hint">Mock mode is default. Set <code>MOCK_MODE=0</code> + <code>OPENAI_API_KEY</code> to use a real LLM controller.</div>
+    </section>
+
+    <section class="card trace">
+      <div class="card-h">
+        Trace
+        <span id="runId" class="pill">no run</span>
+      </div>
+      <div id="trace" class="traceBody">
+        <div class="empty">Run an input to see step-by-step tracing.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Local demo UI • FastAPI + Pydantic + Tools + Tracing</span>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

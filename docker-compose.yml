@@ -1,0 +1,17 @@
+services:
+  fastapi-agent-sdk-mini:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MOCK_MODE=${MOCK_MODE:-1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - APP_LOG_DIR=/app/.runs
+    volumes:
+      - ./:/app
+      - runs:/app/.runs
+
+volumes:
+  runs:

@@ -3,6 +3,9 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# local run logs
+.runs/
+
 # C extensions
 *.so
 

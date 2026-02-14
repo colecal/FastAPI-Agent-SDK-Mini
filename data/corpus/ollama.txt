@@ -1,0 +1,7 @@
+Ollama notes
+
+Ollama can be used as a local LLM. Many clients expect an OpenAI-compatible API.
+If you run an OpenAI compatibility layer, you may be able to set OPENAI_BASE_URL=http://localhost:11434/v1
+and OPENAI_MODEL to a model you have pulled.
+
+If you do not have a /v1 compatibility layer, you'll need a different client.

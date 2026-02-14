@@ -1,0 +1,9 @@
+Agent SDK mini-architecture
+
+An agent loop often follows: plan → choose tool → execute → observe → iterate → finalize.
+
+Key concepts:
+- Tool registry: a catalog of tools the agent is allowed to call.
+- Permissions: each tool may be allowed or denied (e.g., file access).
+- Structured outputs: tools and LLM outputs should be validated with schemas.
+- Tracing: capture each step, tool call, tool output, and timing.
