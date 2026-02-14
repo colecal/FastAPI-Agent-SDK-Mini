@@ -14,6 +14,7 @@ class AgentRunRequest(BaseModel):
     history: List[ChatMessage] = Field(default_factory=list)
     max_steps: int = 6
     run_name: Optional[str] = None
+    api_key: Optional[str] = None  # optional per-run override for real LLM mode
 
 
 class AgentRunResponse(BaseModel):

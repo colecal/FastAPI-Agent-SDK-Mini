@@ -128,6 +128,77 @@ function shouldForceMock(){
   return false;
 }
 
+function loadApiKey(){
+  try { return localStorage.getItem('FASTAPI_AGENT_SDK_API_KEY') || ''; }
+  catch(e){ return ''; }
+}
+
+function saveApiKey(v){
+  try {
+    if(!v) localStorage.removeItem('FASTAPI_AGENT_SDK_API_KEY');
+    else localStorage.setItem('FASTAPI_AGENT_SDK_API_KEY', v);
+  } catch(e){}
+}
+
+async function fetchTools(){
+  const el = $('#tools');
+  if(!el) return;
+
+  // Pages demo: no backend
+  if(shouldForceMock()){
+    el.innerHTML = `
+      <div class="toolCard">
+        <div class="name">calculator</div>
+        <div class="desc">Evaluate a math expression (demo-safe).</div>
+        <div class="toolMeta">
+          <span class="toolPill">mock</span>
+          <span class="toolPill">allowed</span>
+        </div>
+      </div>
+      <div class="toolCard">
+        <div class="name">summarize_text</div>
+        <div class="desc">Summarize text into a few sentences.</div>
+        <div class="toolMeta">
+          <span class="toolPill">mock</span>
+          <span class="toolPill">allowed</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  el.innerHTML = '<div class="empty">Loading tools…</div>';
+  try{
+    const r = await fetch('./api/tools');
+    if(!r.ok) throw new Error(await r.text());
+    const data = await r.json();
+    const tools = data.tools || [];
+
+    if(!tools.length){
+      el.innerHTML = '<div class="empty">No tools registered.</div>';
+      return;
+    }
+
+    el.innerHTML = '';
+    tools.forEach((t)=>{
+      const card = document.createElement('div');
+      card.className = 'toolCard';
+      const allowed = t.permission?.allow !== false;
+      card.innerHTML = `
+        <div class="name">${escapeHtml(t.name)}</div>
+        <div class="desc">${escapeHtml(t.description || '')}</div>
+        <div class="toolMeta">
+          <span class="toolPill">${allowed ? 'allowed' : 'denied'}</span>
+          <span class="toolPill">${escapeHtml(JSON.stringify(Object.keys(t.input_schema||{})).slice(0,60))}</span>
+        </div>
+      `;
+      el.appendChild(card);
+    });
+  }catch(e){
+    el.innerHTML = `<div class="empty">Couldn’t load tools from backend. (${escapeHtml(String(e))})</div>`;
+  }
+}
+
 async function runAgent() {
   const text = $('#input').value.trim();
   if (!text) return;
@@ -147,10 +218,13 @@ async function runAgent() {
   }
 
   try {
+    const apiKey = ($('#apiKey')?.value || '').trim();
+    saveApiKey(apiKey);
+
     const resp = await fetch('./api/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, history: [], max_steps: 6 })
+      body: JSON.stringify({ message: text, history: [], max_steps: 6, api_key: apiKey || null })
     });
     if (!resp.ok) throw new Error(await resp.text());
 
@@ -177,6 +251,15 @@ $('#send').addEventListener('click', runAgent);
 $('#input').addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') runAgent();
 });
+
+// API key persistence
+if($('#apiKey')){
+  $('#apiKey').value = loadApiKey();
+  $('#apiKey').addEventListener('change', (e)=> saveApiKey(e.target.value.trim()));
+}
+
+if($('#refreshTools')) $('#refreshTools').addEventListener('click', fetchTools);
+fetchTools();
 
 // Initial examples
 addMessage('assistant', "Try: 'calculate 2*(3+4)' or 'explain agent sdk' or 'summarize: ...'");

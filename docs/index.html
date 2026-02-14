@@ -29,9 +29,12 @@
       <div id="messages" class="messages"></div>
       <div class="composer">
         <textarea id="input" rows="2" placeholder="Try: calculate 2*(3+4)  |  summarize: ...  |  explain agent sdk"></textarea>
-        <button id="send" class="btn primary">Run</button>
+        <div class="composer-right">
+          <input id="apiKey" class="apiKey" type="password" placeholder="API key (optional)" autocomplete="off" />
+          <button id="send" class="btn primary">Run</button>
+        </div>
       </div>
-      <div class="hint">Mock mode is default. Set <code>MOCK_MODE=0</code> + <code>OPENAI_API_KEY</code> to use a real LLM controller.</div>
+      <div class="hint">Mock mode is default. To try a real controller: set <code>MOCK_MODE=0</code> and provide an API key (env <code>OPENAI_API_KEY</code> or the box above).</div>
     </section>
 
     <section class="card trace">
@@ -41,6 +44,16 @@
       </div>
       <div id="trace" class="traceBody">
         <div class="empty">Run an input to see step-by-step tracing.</div>
+      </div>
+    </section>
+
+    <section class="card tools">
+      <div class="card-h">
+        Tools
+        <button id="refreshTools" class="btn" style="padding:6px 10px; border-radius:12px; margin-left:auto;">Refresh</button>
+      </div>
+      <div id="tools" class="toolsBody">
+        <div class="empty">Loading tools…</div>
       </div>
     </section>
   </main>

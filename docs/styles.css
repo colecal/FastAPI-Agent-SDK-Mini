@@ -118,6 +118,21 @@ body{
 .msg pre{margin:0;white-space:pre-wrap;font-family:var(--sans)}
 
 .composer{display:flex;gap:10px;padding:12px 14px;border-top:1px solid var(--border);background: rgba(255,255,255,.03)}
+
+.composer-right{display:flex;flex-direction:column;gap:10px;min-width: 220px}
+
+.apiKey{
+  width: 220px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background: rgba(5,8,18,.35);
+  color: var(--text);
+  padding:10px 12px;
+  font-family:var(--sans);
+  outline:none;
+}
+.apiKey:focus{border-color: rgba(32,211,255,.55)}
+
 textarea{
   width:100%;
   resize:vertical;
@@ -136,7 +151,15 @@ textarea:focus{border-color: rgba(32,211,255,.55)}
 
 .pill{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--border);padding:3px 8px;border-radius:999px}
 
-.traceBody{padding:14px;max-height: 520px;overflow:auto}
+.traceBody{padding:14px;max-height: 390px;overflow:auto}
+
+.toolsBody{padding:14px;max-height: 260px;overflow:auto}
+
+.toolCard{border:1px solid var(--border);background: rgba(255,255,255,.04);border-radius:16px;padding:12px;margin-bottom:10px}
+.toolCard .name{font-weight:700}
+.toolCard .desc{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.4}
+.toolMeta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.toolPill{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--border);padding:3px 8px;border-radius:999px}
 .empty{color:var(--muted)}
 .step{border:1px solid var(--border);background: rgba(255,255,255,.04);border-radius:16px;padding:12px;margin-bottom:10px}
 .step .k{color:var(--muted);font-size:12px;margin-bottom:6px}

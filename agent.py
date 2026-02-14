@@ -47,7 +47,7 @@ class Agent:
 
                 plan = self._plan(req.message, observation)
 
-                choice = await self._choose_tool(req.message, plan, observation)
+                choice = await self._choose_tool(req.message, plan, observation, api_key_override=req.api_key)
 
                 tool_call: ToolCall | None = None
                 tool_result = None
@@ -113,8 +113,15 @@ class Agent:
             return "Identify whether a tool is needed; if so pick the best tool to produce the answer."
         return "Use the latest tool output to craft the final response, or run another tool if needed."
 
-    async def _choose_tool(self, user_message: str, plan: str, observation: str) -> ToolChoice:
-        if settings.mock_mode or not settings.openai_api_key:
+    async def _choose_tool(
+        self,
+        user_message: str,
+        plan: str,
+        observation: str,
+        api_key_override: str | None = None,
+    ) -> ToolChoice:
+        api_key = api_key_override or settings.openai_api_key
+        if settings.mock_mode or not api_key:
             return self._mock_choose_tool(user_message, observation)
 
         # Real LLM path: ask for a ToolChoice JSON object.
@@ -133,7 +140,7 @@ class Agent:
                 "Decide the next action."
             ),
         }
-        client = get_llm_client()
+        client = get_llm_client(api_key_override=api_key)
         resp = await client.chat(messages=[{"role": "system", "content": sys}, prompt], temperature=0.0)
         try:
             data = json.loads(resp.content)

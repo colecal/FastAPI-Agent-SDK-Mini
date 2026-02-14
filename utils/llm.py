@@ -50,9 +50,9 @@ class OpenAICompatibleClient:
         return LLMResponse(content=content, raw=data)
 
 
-def get_llm_client() -> OpenAICompatibleClient:
+def get_llm_client(api_key_override: Optional[str] = None) -> OpenAICompatibleClient:
     return OpenAICompatibleClient(
         base_url=settings.openai_base_url,
-        api_key=settings.openai_api_key,
+        api_key=api_key_override or settings.openai_api_key,
         model=settings.openai_model,
     )
